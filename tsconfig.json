@@ -15,14 +15,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx"
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/main.tsx",
-    "src/App.tsx",
-    "src/vite-env.d.ts",
-    "src/lib/**/*.ts",
-    "src/components/**/*.tsx"
-  ]
+  "include": ["src"]
 }
