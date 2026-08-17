@@ -1,22 +1,15 @@
 {
-  "bundYield": 0.032,
+  "label": "Beispielstand 2026-08-17",
+  "asOf": "2026-08-17",
+  "bundYield": 0.0320,
   "daxTrailing12m": 0.1078,
   "cashRate": 0.0225,
-  "asOf": "2026-08-17",
-  "bundAsOf": "2026-08-17",
-  "daxAsOf": "2026-08-03",
-  "cashAsOf": "2026-06-17",
-  "frequency": {
-    "bundYield": "täglich (EOD)",
-    "daxTrailing12m": "Snapshot / Beispielstand",
-    "cashRate": "bei Änderung"
-  },
   "delayed": true,
-  "label": "Markt / EOD / verzögert",
+  "frequency": "daily/EOD",
   "sources": {
-    "bundYield": "Deutsche Bundesbank, Zeitreihe BBSSY.D.REN.EUR.A630.000000WT1010.A – Rendite der jeweils jüngsten Bundesanleihe mit 10 Jahren Laufzeit. Zuletzt 3,20 % am 17.08.2026 (ISIN DE000BU2Z072).",
-    "daxTrailing12m": "Beispielstand, nicht live: öffentlich berichtete DAX-Gesamtrendite über ca. 12 Monate zum 03.08.2026 (rund 10,78 %). Kein Handels-Feed, kein Browser-Abruf.",
-    "cashRate": "EZB, Einlagefazilität (Deposit Facility Rate), Reihe FM.B.U2.EUR.4F.KR.DFR.LEV, letzte Änderung 2,25 % am 17.06.2026."
+    "bundYield": "Deutsche Bundesbank BBSSY (10-jährige Bundesanleihe), EOD, zwischengespeichert (cached). Lehre, nicht Handel.",
+    "daxTrailing12m": "Stooq EOD, trailing 12 Monate, Beispielstand 2026-08-03, zwischengespeichert (cached). Markt/EOD/delayed, nicht Berger-Soll. Lehre, nicht Handel.",
+    "cashRate": "EZB DFR / Kasse, EOD, zwischengespeichert (cached). Lehre, nicht Handel."
   },
-  "notes": "Lehre, nicht Handel. Die Bund-Rendite wurde beim Bau des Labors von der Bundesbank-API geholt. Die DAX-Zahl ist ein datierter Beispielstand. Das Modell ersetzt keine Excel-Rechnung und keine Anlageberatung."
+  "notes": "Seed-JSON, bewusst kein Live-Feed. Die Zahlen sind ein datierter Beispielstand vom 17.08.2026 (DAX trailing 12M: 03.08.2026). Sie ersetzen keine Bundesbank-/EZB-Abfrage und sind nicht für Handelsentscheidungen gedacht."
 }
