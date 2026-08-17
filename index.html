@@ -5,14 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="FAM Einheit T01: Interaktives Labor zum magischen Dreieck. Familienstiftung Berger. OTH Regensburg." />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="referrer" content="no-referrer" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>FAM – Financial Markets and Asset Management | Einheit T01</title>
   </head>
   <body>
-    <div id="root">
-      <p class="boot">Labor wird geladen …</p>
+    <a class="skip" href="#inhalt">Zum Inhalt</a>
+    <div class="wrap" id="inhalt">
+      <header class="masthead">
+        <p class="kicker">OTH Regensburg · Fakultät Business and Management · FAM</p>
+        <h1>FAM – Financial Markets and Asset Management | Einheit T01</h1>
+        <p class="sub">Magisches Dreieck · Rendite / Sicherheit / Liquidität · Familienstiftung Berger</p>
+        <div class="bar" aria-hidden="true"></div>
+      </header>
+
+      <section class="card" aria-labelledby="sit-title">
+        <h2 id="sit-title">Situation</h2>
+        <p class="lede">
+          Sie beraten die gemeinnützige <strong>Familienstiftung Berger</strong>.
+          Das Vermögen beträgt <strong>12.000.000 €</strong>. Die Satzung verlangt
+          eine Ausschüttung von <strong>3,00&nbsp;%</strong> der Jahresanfangssumme
+          und begrenzt den akzeptierten Drawdown auf <strong>10,00&nbsp;%</strong>.
+        </p>
+        <dl class="facts">
+          <div class="fact">
+            <dt>Ausschüttung (Berger-Soll)</dt>
+            <dd>3,00 % = 360.000 €</dd>
+          </div>
+          <div class="fact">
+            <dt>Maximaler Drawdown (Berger-Soll)</dt>
+            <dd>10,00 % = 1.200.000 €</dd>
+          </div>
+        </dl>
+        <p>
+          Der Horizont der Stiftung ist unendlich. Im HANDWEG rechnen Sie trotzdem
+          mit einem konkreten Jahresbedarf, einem Horizont in Jahren und einem
+          Liquiditätsbedarf binnen zwölf Monaten.
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="handweg-title">
+        <h2 id="handweg-title">HANDWEG – Ihr Profil in Zahlen</h2>
+        <p>
+          Tippen Sie die drei Zahlen selbst. Die Felder sind absichtlich leer.
+          Erst nach dem Bestätigen sehen Sie den Vergleich mit dem Berger-Soll
+          und das Dreieck wird freigegeben.
+        </p>
+        <form id="handweg-form" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="bedarf">Jährlicher Euro-Bedarf</label>
+              <span class="hint" id="bedarf-hint">Ausschüttung in Euro je Jahr, nicht in Prozent.</span>
+              <input id="bedarf" name="bedarf" type="text" inputmode="decimal" autocomplete="off" required placeholder="Jahresbedarf in Euro" aria-describedby="bedarf-hint" />
+            </div>
+            <div class="field">
+              <label for="horizont">Horizont (Jahre)</label>
+              <span class="hint" id="horizont-hint">Ganze Jahre. Für die Stiftung ist 10 ein üblicher Rechenhorizont.</span>
+              <input id="horizont" name="horizont" type="text" inputmode="decimal" autocomplete="off" required placeholder="Jahre" aria-describedby="horizont-hint" />
+            </div>
+            <div class="field">
+              <label for="liquiditaet">Liquiditätsbedarf (EUR binnen 12 Monaten)</label>
+              <span class="hint" id="liq-hint">Betrag, der ohne Notverkauf verfügbar sein soll.</span>
+              <input id="liquiditaet" name="liquiditaet" type="text" inputmode="decimal" autocomplete="off" required placeholder="Euro binnen 12 Monaten" aria-describedby="liq-hint" />
+            </div>
+          </div>
+          <p class="err" id="form-error" role="alert"></p>
+          <div class="actions">
+            <button type="submit">Profil bestätigen</button>
+            <button type="button" class="secondary" id="canon">Kanon-Zahlen einsetzen</button>
+            <button type="button" class="secondary" id="reset">Zurücksetzen</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card hidden" id="compare" aria-labelledby="compare-title">
+        <h2 id="compare-title">Ihre Quoten gegen das Berger-Soll</h2>
+        <p id="compare-note"></p>
+        <table class="compare">
+          <thead>
+            <tr>
+              <th scope="col">Größe</th>
+              <th scope="col">Ihre Eingabe / 12.000.000 €</th>
+              <th scope="col">Berger-Soll</th>
+            </tr>
+          </thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+      </section>
+
+      <section class="card triangle-card" aria-labelledby="tri-title">
+        <h2 id="tri-title">Magisches Dreieck</h2>
+        <p>
+          Drei Gewichte, Summe immer 100&nbsp;%. Wer Rendite anhebt, drückt
+          Sicherheit oder Liquidität. Die durchgezogenen Linien sind hart:
+          3,00&nbsp;% Mindest-Rendite und 10,00&nbsp;% maximaler Drawdown.
+        </p>
+        <div id="verdict" class="verdict" hidden aria-live="polite"></div>
+        <div id="triangle-region" aria-disabled="true">
+          <div class="triangle-lock" id="triangle-lock">
+            <p>Das Dreieck bleibt gesperrt, bis Sie das HANDWEG-Profil bestätigt haben.</p>
+          </div>
+          <div class="triangle-host" id="triangle-host"></div>
+        </div>
+        <div class="sliders">
+          <div class="slider-row">
+            <label for="slider-r">Rendite <span id="val-r">33,33 %</span></label>
+            <input id="slider-r" type="range" min="0" max="100" step="1" value="33" disabled />
+          </div>
+          <div class="slider-row">
+            <label for="slider-s">Sicherheit <span id="val-s">33,33 %</span></label>
+            <input id="slider-s" type="range" min="0" max="100" step="1" value="33" disabled />
+          </div>
+          <div class="slider-row">
+            <label for="slider-l">Liquidität <span id="val-l">33,33 %</span></label>
+            <input id="slider-l" type="range" min="0" max="100" step="1" value="34" disabled />
+          </div>
+        </div>
+        <p class="hint">
+          Lehr-Modell: Aktien-Ecke = DAX trailing, Bund-Ecke = Bund-Rendite,
+          Kasse-Ecke = EZB-nahe Verzinsung. Drawdowns 30&nbsp;% / 8&nbsp;% / 0&nbsp;%
+          an den Ecken. Keine Prognose, kein Optimierer.
+        </p>
+      </section>
+
+      <section class="card market" aria-labelledby="market-title">
+        <h2 id="market-title">Markt</h2>
+        <div id="market-box">
+          <p>Marktdaten werden gelesen …</p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="merke-title">
+        <h2 id="merke-title">Merksatz</h2>
+        <p class="merksatz">„Nicht das Produkt bestimmt die Anlage, sondern das Profil.“</p>
+      </section>
+
+      <section class="card" aria-labelledby="task-title">
+        <h2 id="task-title">Aufgabe (Moodle-bereit)</h2>
+        <div class="task">
+          <p>
+            Sie setzen im Dreieck 40&nbsp;% Rendite, 35&nbsp;% Sicherheit und
+            25&nbsp;% Liquidität. Das Lehr-Modell rechnet den Drawdown als
+            30&nbsp;% · 40&nbsp;% + 8&nbsp;% · 35&nbsp;% + 0&nbsp;% · 25&nbsp;%.
+          </p>
+          <p>
+            Wie hoch ist der modellierte maximale Drawdown in Prozent
+            (zwei Dezimalen, de-DE)? Prüfen Sie anschließend, ob die
+            Berger-Grenze von 10,00&nbsp;% eingehalten ist.
+          </p>
+        </div>
+      </section>
     </div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <footer class="site-footer">
+      <div class="inner">
+        <span>Prof. Dr. Wolfgang Hößl · FAM · Einheit T01</span>
+        <span id="footer-meta">Quelle: Beispielstand · EOD/delayed</span>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
