@@ -22,19 +22,19 @@ export const SEED_MARKET: MarketData = {
   daxTrailing12m: 0.1078,
   cashRate: 0.0225,
   asOf: "2026-08-17",
-  label: "Beispielstand 2026-08-17",
+  label: "Beispielstand 17.08.2026",
   delayed: true,
   frequency: "daily/EOD",
   sources: {
     bundYield:
-      "Deutsche Bundesbank BBSSY (10-jährige Bundesanleihe), EOD, zwischengespeichert (cached). Lehre, nicht Handel.",
+      "Deutsche Bundesbank, Reihe BBSSY, 10-jährige Bundesanleihe. Schlusskurs des Tages, gespeichert. Für die Lehre, nicht für den Handel.",
     daxTrailing12m:
-      "Stooq EOD, trailing 12 Monate, Beispielstand 2026-08-03, zwischengespeichert (cached). Markt/EOD/delayed, nicht Berger-Soll. Lehre, nicht Handel.",
+      "Stooq, Schlusskurs des Tages. DAX-Rendite der letzten zwölf Monate, Beispielstand 03.08.2026, gespeichert. Marktstand, nicht Berger-Soll. Für die Lehre, nicht für den Handel.",
     cashRate:
-      "EZB DFR / Kasse, EOD, zwischengespeichert (cached). Lehre, nicht Handel.",
+      "EZB DFR 2,25 %. Schlusskurs des Tages, gespeichert. Für die Lehre, nicht für den Handel.",
   },
   notes:
-    "Seed-JSON, bewusst kein Live-Feed. Die Zahlen sind ein datierter Beispielstand vom 17.08.2026 (DAX trailing 12M: 03.08.2026). Nicht für Handelsentscheidungen.",
+    "Die Zahlen sind ein datierter Beispielstand vom 17.08.2026. Die DAX-Rendite der letzten zwölf Monate gilt zum 03.08.2026. Sie ersetzen keine Abfrage bei Bundesbank oder EZB. Sie sind nicht für Handelsentscheidungen gedacht.",
 };
 
 function isRecord(x: unknown): x is Record<string, unknown> {

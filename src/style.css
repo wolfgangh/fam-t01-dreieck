@@ -173,6 +173,9 @@ button:hover:not(:disabled) { filter: brightness(1.08); }
 
 .err { color: var(--accent); font-weight: 650; margin: 8px 0 0; }
 
+#form-error:empty,
+#form-hint:empty { display: none; }
+
 .compare {
   width: 100%;
   border-collapse: collapse;
@@ -237,6 +240,18 @@ button:hover:not(:disabled) { filter: brightness(1.08); }
 }
 
 .sliders { display: grid; gap: 14px; margin-top: 12px; }
+
+.mix {
+  border-left: 4px solid #C22E0C;
+  background: var(--soft);
+  padding: 12px 14px;
+  margin: 16px 0 4px;
+}
+
+.mix p { margin: 0 0 0.7rem; }
+.mix p:last-child { margin-bottom: 0; }
+
+#mix-card[hidden] { display: none; }
 
 .slider-row label {
   display: flex;

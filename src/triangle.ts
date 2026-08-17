@@ -6,6 +6,8 @@ export const BERGER_PAYOUT_EUR = 360_000;
 export const BERGER_PAYOUT_RATIO = 0.03;
 export const BERGER_MDD_EUR = 1_200_000;
 export const BERGER_MDD_RATIO = 0.1;
+export const BERGER_LIQ_EUR = 360_000;
+export const BERGER_LIQ_RATIO = 0.03;
 export const ACCENT = "#C22E0C";
 export const GRAU = "#9D9D9C";
 
@@ -45,6 +47,7 @@ export type ModelEval = {
   returnOk: boolean;
   mddOk: boolean;
   liqOk: boolean;
+  payoutOk: boolean;
   feasible: boolean;
 };
 
@@ -96,6 +99,7 @@ export function evaluateModel(
   w: Weights,
   market: MarketData,
   liqNeedEur: number,
+  bedarfEur: number,
 ): ModelEval {
   const nw = normalizeWeights(w);
   const impliedReturn =
@@ -106,16 +110,15 @@ export function evaluateModel(
     nw.wr * MODEL_MDD.rendite +
     nw.ws * MODEL_MDD.sicherheit +
     nw.wl * MODEL_MDD.liquiditaet;
-  const impliedLiq =
-    nw.wr * MODEL_LIQ.rendite +
-    nw.ws * MODEL_LIQ.sicherheit +
-    nw.wl * MODEL_LIQ.liquiditaet;
-  const minReturn = BERGER_PAYOUT_RATIO;
+  const impliedLiq = nw.wl * 1;
+  const payoutRatio = bedarfEur / WEALTH_EUR;
+  const minReturn = Math.max(BERGER_PAYOUT_RATIO, payoutRatio);
   const maxMdd = BERGER_MDD_RATIO;
-  const minLiq = Math.max(0, liqNeedEur / WEALTH_EUR);
+  const minLiq = liqNeedEur / WEALTH_EUR;
   const returnOk = impliedReturn + 1e-9 >= minReturn;
   const mddOk = impliedMdd - 1e-9 <= maxMdd;
   const liqOk = impliedLiq + 1e-9 >= minLiq;
+  const payoutOk = payoutRatio <= BERGER_PAYOUT_RATIO + 1e-9;
   return {
     impliedReturn,
     impliedMdd,
@@ -126,7 +129,8 @@ export function evaluateModel(
     returnOk,
     mddOk,
     liqOk,
-    feasible: returnOk && mddOk,
+    payoutOk,
+    feasible: returnOk && mddOk && liqOk && payoutOk,
   };
 }
 
@@ -303,14 +307,14 @@ export function renderTriangleMarkup(
       </defs>
       <polygon points="${tri}" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.2" />
       ${model.feasible ? "" : `<polygon points="${tri}" fill="url(#hatch)" opacity="0.5" clip-path="url(#tri-clip)" />`}
-      ${rSeg ? constraintStroke(rSeg, `Ausschüttung ${formatPct(BERGER_PAYOUT_RATIO)}`, !model.returnOk) : ""}
+      ${rSeg ? constraintStroke(rSeg, `Ausschüttung ${formatPct(BERGER_PAYOUT_RATIO)}`, model.impliedReturn + 1e-9 < BERGER_PAYOUT_RATIO) : ""}
       ${dSeg ? constraintStroke(dSeg, `Drawdown ${formatPct(BERGER_MDD_RATIO)}`, !model.mddOk) : ""}
       <text x="${verts.rendite.x}" y="${verts.rendite.y - 16}" text-anchor="middle" class="v-title">Rendite</text>
       <text x="${verts.rendite.x}" y="${verts.rendite.y - 2}" text-anchor="middle" class="v-sub">Markt: Aktien-Ecke</text>
       <text x="${verts.sicherheit.x - 6}" y="${verts.sicherheit.y + 20}" text-anchor="start" class="v-title">Sicherheit</text>
       <text x="${verts.sicherheit.x - 6}" y="${verts.sicherheit.y + 34}" text-anchor="start" class="v-sub">Markt: Bund-Ecke</text>
       <text x="${verts.liquiditaet.x + 6}" y="${verts.liquiditaet.y + 20}" text-anchor="end" class="v-title">Liquidität</text>
-      <text x="${verts.liquiditaet.x + 6}" y="${verts.liquiditaet.y + 34}" text-anchor="end" class="v-sub">Markt: Kasse-Ecke</text>
+      <text x="${verts.liquiditaet.x + 6}" y="${verts.liquiditaet.y + 34}" text-anchor="end" class="v-sub">EZB DFR ${formatPct(market.cashRate)}</text>
       <g class="handle-group" ${locked ? 'aria-disabled="true"' : ""}>
         <circle cx="${pt.x}" cy="${pt.y}" r="18" fill="transparent" />
         <circle cx="${pt.x}" cy="${pt.y}" r="11" fill="#ffffff" stroke="${handleStroke}" stroke-width="3" />
@@ -382,19 +386,35 @@ export function verdictCopy(model: ModelEval): { word: string; text: string; ok:
     return {
       word: "RICHTIG",
       ok: true,
-      text: `Beide Berger-Linien sind eingehalten. Modell-Rendite ${formatPct(model.impliedReturn)} liegt mindestens bei ${formatPct(model.minReturn)}. Modell-Drawdown ${formatPct(model.impliedMdd)} bleibt unter ${formatPct(model.maxMdd)}.`,
+      text: `Beide Berger-Linien sind eingehalten. Die modellierte Rendite ${formatPct(model.impliedReturn)} liegt mindestens bei ${formatPct(model.minReturn)}. Der modellierte Drawdown ${formatPct(model.impliedMdd)} bleibt unter ${formatPct(model.maxMdd)}.`,
     };
   }
   const parts: string[] = [];
-  if (!model.returnOk) {
+  if (!model.payoutOk) {
     parts.push(
-      `Die Mindest-Rendite von ${formatPct(model.minReturn)} wird verfehlt (Modell ${formatPct(model.impliedReturn)}). Mehr Gewicht auf Rendite nötig – auf Kosten von Sicherheit oder Liquidität.`,
+      "Die Ausschüttungslinie von 3,00 % ist überschritten. Eine höhere Ausschüttung müsste der Stiftungsrat extra beschließen.",
     );
   }
   if (!model.mddOk) {
     parts.push(
-      `Die 10,00 %-Drawdown-Linie ist überschritten (Modell ${formatPct(model.impliedMdd)}). Sicherheit und Liquidität werden zu stark gequetscht.`,
+      `Die Drawdown-Linie von 10,00 % ist überschritten. Der modellierte Drawdown beträgt ${formatPct(model.impliedMdd)}. Sicherheit und Liquidität werden zu stark zusammengedrückt.`,
     );
+  }
+  if (!model.returnOk && model.payoutOk) {
+    parts.push(
+      `Die Mindest-Rendite von ${formatPct(model.minReturn)} wird verfehlt. Die modellierte Rendite beträgt ${formatPct(model.impliedReturn)}. Sie brauchen mehr Gewicht auf Rendite. Das geht nur auf Kosten von Sicherheit oder Liquidität.`,
+    );
+  }
+  if (!model.liqOk) {
+    if (model.impliedLiq <= 1e-9 && model.minLiq > 0) {
+      parts.push(
+        "Die Stiftung braucht 360.000 € binnen zwölf Monaten ohne Notverkauf. Ein Portfolio ohne Gewicht auf Liquidität hält diesen Betrag nicht bereit.",
+      );
+    } else {
+      parts.push(
+        `Die 12-Monats-Liquidität von ${formatPct(model.minLiq)} wird verfehlt. Die modellierte Liquidität beträgt ${formatPct(model.impliedLiq)}. Sie brauchen mehr Gewicht auf Liquidität. Das geht nur auf Kosten von Rendite oder Sicherheit.`,
+      );
+    }
   }
   return {
     word: "FALSCH",

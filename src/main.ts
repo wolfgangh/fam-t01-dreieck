@@ -1,15 +1,15 @@
 import "./style.css";
 import {
   formatEuro,
-  formatIsoDate,
   formatPct,
+  formatPctPoints,
   formatYears,
   parseDeNumber,
 } from "./format";
 import { loadMarket, type MarketData, type MarketStatus } from "./market";
 import {
-  BERGER_MDD_EUR,
-  BERGER_MDD_RATIO,
+  BERGER_LIQ_EUR,
+  BERGER_LIQ_RATIO,
   BERGER_PAYOUT_EUR,
   BERGER_PAYOUT_RATIO,
   DEFAULT_WEIGHTS,
@@ -32,7 +32,7 @@ type FormValues = {
 const CANON: FormValues = {
   bedarf: 360_000,
   horizont: 10,
-  liquiditaet: 1_200_000,
+  liquiditaet: 360_000,
 };
 
 function must<T extends HTMLElement>(id: string): T {
@@ -47,6 +47,7 @@ const ui = {
   horizont: must<HTMLInputElement>("horizont"),
   liquiditaet: must<HTMLInputElement>("liquiditaet"),
   formError: must<HTMLParagraphElement>("form-error"),
+  formHint: must<HTMLParagraphElement>("form-hint"),
   compare: must<HTMLElement>("compare"),
   compareBody: must<HTMLElement>("compare-body"),
   compareNote: must<HTMLElement>("compare-note"),
@@ -61,6 +62,7 @@ const ui = {
   valL: must<HTMLElement>("val-l"),
   verdict: must<HTMLElement>("verdict"),
   marketBox: must<HTMLElement>("market-box"),
+  mixCard: must<HTMLElement>("mix-card"),
   footerMeta: must<HTMLElement>("footer-meta"),
   reset: must<HTMLButtonElement>("reset"),
   canon: must<HTMLButtonElement>("canon"),
@@ -76,13 +78,13 @@ function readForm(): FormValues | string {
   const horizont = parseDeNumber(ui.horizont.value);
   const liquiditaet = parseDeNumber(ui.liquiditaet.value);
   if (bedarf === null || horizont === null || liquiditaet === null) {
-    return "Bitte alle drei Felder ausfüllen. Zahlen in de-DE (360000 oder 360.000).";
+    return "Bitte alle drei Felder ausfüllen. Zahlen im deutschen Format: 360000 oder 360.000.";
   }
   if (!(bedarf > 0)) return "Der jährliche Euro-Bedarf muss größer als 0 sein.";
   if (!(horizont > 0) || horizont > 120) {
     return "Der Horizont muss zwischen 1 und 120 Jahren liegen.";
   }
-  if (liquiditaet < 0) return "Der Liquiditätsbedarf darf nicht negativ sein.";
+  if (!(liquiditaet > 0)) return "Der Liquiditätsbedarf muss größer als 0 sein.";
   return { bedarf, horizont, liquiditaet };
 }
 
@@ -112,7 +114,7 @@ function readUrl(): { values: FormValues; weights: Weights } | null {
   const bedarf = Number(q.get("bedarf"));
   const horizont = Number(q.get("horizont"));
   const liquiditaet = Number(q.get("liquiditaet"));
-  if (!(bedarf > 0) || !(horizont > 0) || !(liquiditaet >= 0)) return null;
+  if (!(bedarf > 0) || !(horizont > 0) || !(liquiditaet > 0)) return null;
   const wr = Number(q.get("wr") ?? "33") / 100;
   const ws = Number(q.get("ws") ?? "33") / 100;
   const wl = Number(q.get("wl") ?? "34") / 100;
@@ -146,24 +148,29 @@ function renderCompare(v: FormValues): void {
     <tr>
       <th scope="row">Horizont</th>
       <td>${formatYears(v.horizont, v.horizont >= 80)}</td>
-      <td>unendlich (Stiftung); 10 Jahre als Rechenhorizont im HANDWEG</td>
+      <td>Unendlich für die Stiftung. Im Handweg rechnen Sie mit 10 Jahren.</td>
     </tr>
     <tr>
       <th scope="row">Liquidität binnen 12 Monaten</th>
       <td>${formatEuro(v.liquiditaet)} · ${formatPct(liqRatio)} von 12.000.000 €</td>
-      <td>${formatEuro(BERGER_MDD_EUR)} · ${formatPct(BERGER_MDD_RATIO)} (MDD-Deckel)</td>
+      <td>${formatEuro(BERGER_LIQ_EUR)} · ${formatPct(BERGER_LIQ_RATIO)}</td>
     </tr>
   `;
-  if (Math.abs(needRatio - BERGER_PAYOUT_RATIO) < 0.0005 && Math.abs(liqRatio - BERGER_MDD_RATIO) < 0.0005) {
-    ui.compareNote.textContent =
-      "Ihre Quoten treffen das Berger-Soll. Die harten Linien im Dreieck bleiben 3,00 % Mindest-Rendite und 10,00 % maximaler Drawdown.";
+  let note: string;
+  if (Math.abs(needRatio - BERGER_PAYOUT_RATIO) < 0.0005 && Math.abs(liqRatio - BERGER_LIQ_RATIO) < 0.0005) {
+    note =
+      "Ihre Quoten treffen das Berger-Soll. Die durchgezogenen Linien im Dreieck bleiben hart: 3,00 % Mindest-Rendite und 10,00 % maximaler Drawdown.";
   } else if (needRatio > BERGER_PAYOUT_RATIO + 0.0005) {
-    ui.compareNote.textContent =
-      "Ihr Euro-Bedarf liegt über dem Berger-Soll. Die harte Linie im Dreieck bleibt 3,00 %; eine höhere Ausschüttung müsste der Stiftungsrat extra beschließen.";
+    note =
+      "Ihr Euro-Bedarf liegt über dem Berger-Soll. Die durchgezogene Linie im Dreieck bleibt 3,00 %. Eine höhere Ausschüttung müsste der Stiftungsrat extra beschließen.";
   } else {
-    ui.compareNote.textContent =
-      "Ihre Quoten weichen vom Berger-Soll ab. Vergleichen Sie die Spalten, bevor Sie das Dreieck verschieben. Die harten Linien bleiben 3,00 % und 10,00 %.";
+    note =
+      "Ihre Quoten weichen vom Berger-Soll ab. Vergleichen Sie die Spalten, bevor Sie das Dreieck verschieben. Die durchgezogenen Linien bleiben 3,00 % und 10,00 %.";
   }
+  if (v.horizont >= 80) {
+    note += " Ein Horizont von 80 Jahren oder mehr erscheint in der Tabelle als unendlich.";
+  }
+  ui.compareNote.textContent = note;
 }
 
 function setSlidersEnabled(on: boolean): void {
@@ -173,14 +180,40 @@ function setSlidersEnabled(on: boolean): void {
   ui.region.setAttribute("aria-disabled", on ? "false" : "true");
 }
 
+function formatPctPlain(percentValue: number): string {
+  return formatPctPoints(percentValue).replace(/\s*%$/, "");
+}
+
+function paintMix(model: ReturnType<typeof evaluateModel>): void {
+  if (!unlocked) {
+    ui.mixCard.hidden = true;
+    return;
+  }
+  const rendite = formatPctPlain(weights.wr * 100);
+  const sicherheit = formatPctPlain(weights.ws * 100);
+  const liquiditaet = formatPctPlain(weights.wl * 100);
+  const modellRendite = formatPctPlain(model.impliedReturn * 100);
+  const modellDrawdown = formatPctPlain(model.impliedMdd * 100);
+  ui.mixCard.hidden = false;
+  ui.mixCard.innerHTML = `
+    <h2 id="mix-title">Ihre Position</h2>
+    <p>An dieser Stelle halten Sie ${rendite} Prozent Aktien, ${sicherheit} Prozent Bund und ${liquiditaet} Prozent Kasse.</p>
+    <p>Die modellierte Rendite an diesem Punkt beträgt ${modellRendite} Prozent. Sie mischt die drei Marktgrößen Aktien, Bund und Kasse, die unter Markt stehen.</p>
+    <p>Der modellierte Drawdown an diesem Punkt beträgt ${modellDrawdown} Prozent. Drawdown ist der Weg vom Höchststand nach unten, der größte zwischenzeitliche Verlust.</p>
+    <p>Die Liquidität an diesem Punkt ist der Kasse-Anteil: ${liquiditaet} Prozent. Dieser Teil soll ohne Notverkauf verfügbar sein.</p>
+  `;
+}
+
 function paintTriangle(): void {
   const data = market;
   if (!data || !values) {
     ui.host.innerHTML = "";
+    ui.mixCard.hidden = true;
     return;
   }
-  const model = evaluateModel(weights, data, values.liquiditaet);
+  const model = evaluateModel(weights, data, values.liquiditaet, values.bedarf);
   ui.host.innerHTML = renderTriangleMarkup(weights, model, data, !unlocked);
+  paintMix(model);
   const v = verdictCopy(model);
   ui.verdict.className = `verdict${v.ok ? "" : " is-false"}`;
   ui.verdict.innerHTML = `<span class="verdict-word">${v.word}</span><p>${v.text}</p>`;
@@ -212,39 +245,38 @@ function lockEmpty(): void {
   weights = { ...DEFAULT_WEIGHTS };
   fillInputs(null);
   ui.formError.textContent = "";
+  ui.formHint.textContent = "";
   ui.compare.classList.add("hidden");
   ui.lock.hidden = false;
   ui.verdict.hidden = true;
+  ui.mixCard.hidden = true;
   setSlidersEnabled(false);
   if (market) {
     const dummy: FormValues = CANON;
-    const model = evaluateModel(weights, market, dummy.liquiditaet);
+    const model = evaluateModel(weights, market, dummy.liquiditaet, dummy.bedarf);
     ui.host.innerHTML = renderTriangleMarkup(weights, model, market, true);
   }
   writeUrl();
 }
 
 function renderMarket(data: MarketData, status: MarketStatus): void {
-  const asOf = formatIsoDate(data.asOf);
-  ui.footerMeta.textContent = `Quelle: ${data.label} · ${data.frequency} · EOD/delayed · Stand ${asOf} · nicht Berger-Soll · nicht für den Handel`;
+  ui.footerMeta.textContent = "Beispielstand 17.08.2026. Nicht das Berger-Soll.";
+  if (status === "loading") {
+    ui.marketBox.innerHTML = `<p>Marktdaten werden gelesen.</p>`;
+    return;
+  }
   if (status === "missing") {
     ui.marketBox.innerHTML = `
-      <p class="market-error">Die Datei <code>public/data/market.json</code> fehlt oder ist unlesbar. Das Labor arbeitet weiter mit dem eingebetteten Beispielstand. Es werden keine Live-Kurse geladen.</p>
-      <p>Eingebetteter Stand: Bund ${formatPct(data.bundYield)}, DAX trailing 12M ${formatPct(data.daxTrailing12m)}. ${data.notes}</p>
+      <p class="market-error">Die Marktdatei fehlt oder ist unlesbar. Das Labor arbeitet mit dem eingebetteten Beispielstand weiter. Es werden keine aktuellen Kurse geladen. Eingebetteter Stand: Bund ${formatPctPlain(data.bundYield * 100)} Prozent. DAX der letzten zwölf Monate ${formatPctPlain(data.daxTrailing12m * 100)} Prozent. EZB Deposit Facility Rate ${formatPctPlain(data.cashRate * 100)} Prozent.</p>
     `;
     return;
   }
   ui.marketBox.innerHTML = `
-    <p>
-      <span class="tag">Markt</span>
-      <span class="tag">EOD / delayed</span>
-      <span class="tag">nicht Berger-Soll</span>
-    </p>
-    <p><strong>${data.label}</strong> · Stand ${asOf} · Frequenz ${data.frequency}.</p>
-    <p>Bund-Rendite ${formatPct(data.bundYield)} gegen DAX trailing 12 Monate ${formatPct(data.daxTrailing12m)}. Kasse (EZB-nahe) ${formatPct(data.cashRate)}.</p>
-    <p>${data.sources.bundYield}</p>
-    <p>${data.sources.daxTrailing12m}</p>
-    <p>${data.notes}</p>
+    <p>Was Sie hier sehen, ist ein Beispielstand, kein Auftrag der Stiftung Berger. Die drei Zahlen füllen die Ecken des Lehr-Modells. Sie ersetzen nicht das Berger-Soll von 3,00 Prozent Ausschüttung und 10,00 Prozent Drawdown.</p>
+    <p>Die Bund-Rendite beträgt ${formatPctPlain(data.bundYield * 100)} Prozent. Sie steht an der Sicherheits-Ecke. Quelle: Deutsche Bundesbank, Reihe BBSSY, 10-jährige Bundesanleihe. Schlusskurs des Tages, gespeichert. Beispielstand 17.08.2026.</p>
+    <p>Die DAX-Rendite der letzten zwölf Monate beträgt ${formatPctPlain(data.daxTrailing12m * 100)} Prozent. Sie steht an der Aktien-Ecke. Quelle: Stooq, Schlusskurs des Tages, gespeichert. Diese Zwölfmonatszahl gilt zum 03.08.2026.</p>
+    <p>Die Kasse folgt dem Einlagensatz der EZB, dem Deposit Facility Rate. Er beträgt ${formatPctPlain(data.cashRate * 100)} Prozent. Er steht an der Liquiditäts-Ecke. Beispielstand 17.08.2026.</p>
+    <p>Die drei Sätze ersetzen keine Abfrage bei Bundesbank oder EZB. Sie sind nicht für Handelsentscheidungen gedacht.</p>
   `;
 }
 
@@ -280,9 +312,11 @@ async function boot(): Promise<void> {
     const parsed = readForm();
     if (typeof parsed === "string") {
       ui.formError.textContent = parsed;
+      ui.formHint.textContent = "";
       return;
     }
     ui.formError.textContent = "";
+    ui.formHint.textContent = "";
     unlock(parsed);
   });
 
@@ -292,8 +326,9 @@ async function boot(): Promise<void> {
 
   ui.canon.addEventListener("click", () => {
     fillInputs(CANON);
-    ui.formError.textContent =
-      "Kanon-Zahlen stehen in den Feldern. Bitte mit „Profil bestätigen“ abschicken – das Dreieck öffnet sich erst danach.";
+    ui.formError.textContent = "";
+    ui.formHint.textContent =
+      "Die Berger-Zahlen stehen in den Feldern. Bestätigen Sie das Profil. Das Dreieck öffnet sich erst danach.";
     ui.bedarf.focus();
   });
 

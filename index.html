@@ -20,12 +20,22 @@
 
       <section class="card" aria-labelledby="sit-title">
         <h2 id="sit-title">Situation</h2>
-        <p class="lede">
-          Sie beraten die gemeinnützige <strong>Familienstiftung Berger</strong>.
-          Das Vermögen beträgt <strong>12.000.000 €</strong>. Die Satzung verlangt
-          eine Ausschüttung von <strong>3,00&nbsp;%</strong> der Jahresanfangssumme
-          und begrenzt den akzeptierten Drawdown auf <strong>10,00&nbsp;%</strong>.
-        </p>
+        <div class="lede">
+          <p>
+            Sie beraten die gemeinnützige <strong>Familienstiftung Berger</strong>.
+            Das Vermögen beträgt <strong>12.000.000 €</strong>.
+          </p>
+          <p>
+            Die Satzung verlangt eine Ausschüttung von <strong>3,00&nbsp;%</strong>
+            der Summe zu Jahresbeginn. Das sind <strong>360.000 €</strong> im Jahr.
+          </p>
+          <p>
+            Die Satzung setzt eine Verlustgrenze. Diese Grenze nennen wir Drawdown.
+            Drawdown ist der Weg vom Höchststand nach unten, der größte
+            zwischenzeitliche Verlust. Meist steht er in Prozent. Bei Berger:
+            <strong>10,00&nbsp;%</strong>, das sind <strong>1.200.000 €</strong>.
+          </p>
+        </div>
         <dl class="facts">
           <div class="fact">
             <dt>Ausschüttung (Berger-Soll)</dt>
@@ -37,18 +47,19 @@
           </div>
         </dl>
         <p>
-          Der Horizont der Stiftung ist unendlich. Im HANDWEG rechnen Sie trotzdem
-          mit einem konkreten Jahresbedarf, einem Horizont in Jahren und einem
-          Liquiditätsbedarf binnen zwölf Monaten.
+          Der Horizont der Stiftung ist unendlich. Im Handweg, also mit Stift und
+          Papier, rechnen Sie trotzdem mit drei Größen: dem Jahresbedarf in Euro,
+          einem Horizont in Jahren und dem Betrag, der binnen zwölf Monaten ohne
+          Notverkauf verfügbar sein soll.
         </p>
       </section>
 
       <section class="card" aria-labelledby="handweg-title">
-        <h2 id="handweg-title">HANDWEG – Ihr Profil in Zahlen</h2>
+        <h2 id="handweg-title">Handweg – Ihr Profil in Zahlen</h2>
         <p>
           Tippen Sie die drei Zahlen selbst. Die Felder sind absichtlich leer.
-          Erst nach dem Bestätigen sehen Sie den Vergleich mit dem Berger-Soll
-          und das Dreieck wird freigegeben.
+          Erst nach dem Bestätigen sehen Sie den Vergleich mit dem Berger-Soll.
+          Danach wird das Dreieck freigegeben.
         </p>
         <form id="handweg-form" novalidate>
           <div class="form-grid">
@@ -69,9 +80,10 @@
             </div>
           </div>
           <p class="err" id="form-error" role="alert"></p>
+          <p class="hint" id="form-hint"></p>
           <div class="actions">
             <button type="submit">Profil bestätigen</button>
-            <button type="button" class="secondary" id="canon">Kanon-Zahlen einsetzen</button>
+            <button type="button" class="secondary" id="canon">Berger-Zahlen einsetzen</button>
             <button type="button" class="secondary" id="reset">Zurücksetzen</button>
           </div>
         </form>
@@ -95,17 +107,21 @@
       <section class="card triangle-card" aria-labelledby="tri-title">
         <h2 id="tri-title">Magisches Dreieck</h2>
         <p>
-          Drei Gewichte, Summe immer 100&nbsp;%. Wer Rendite anhebt, drückt
-          Sicherheit oder Liquidität. Die durchgezogenen Linien sind hart:
-          3,00&nbsp;% Mindest-Rendite und 10,00&nbsp;% maximaler Drawdown.
+          Drei Gewichte. Die Summe ist immer 100&nbsp;%. Wer Rendite anhebt,
+          drückt Sicherheit oder Liquidität.
+        </p>
+        <p>
+          Die durchgezogenen Linien sind hart. Mindest-Rendite 3,00&nbsp;%.
+          Maximaler Drawdown 10,00&nbsp;%.
         </p>
         <div id="verdict" class="verdict" hidden aria-live="polite"></div>
         <div id="triangle-region" aria-disabled="true">
           <div class="triangle-lock" id="triangle-lock">
-            <p>Das Dreieck bleibt gesperrt, bis Sie das HANDWEG-Profil bestätigt haben.</p>
+            <p>Das Dreieck bleibt gesperrt, bis Sie das Handweg-Profil bestätigt haben.</p>
           </div>
           <div class="triangle-host" id="triangle-host"></div>
         </div>
+        <div id="mix-card" class="mix" hidden></div>
         <div class="sliders">
           <div class="slider-row">
             <label for="slider-r">Rendite <span id="val-r">33,33 %</span></label>
@@ -121,16 +137,22 @@
           </div>
         </div>
         <p class="hint">
-          Lehr-Modell: Aktien-Ecke = DAX trailing, Bund-Ecke = Bund-Rendite,
-          Kasse-Ecke = EZB-nahe Verzinsung. Drawdowns 30&nbsp;% / 8&nbsp;% / 0&nbsp;%
-          an den Ecken. Keine Prognose, kein Optimierer.
+          Lehr-Modell. Die Aktien-Ecke folgt der DAX-Rendite der letzten zwölf Monate.
+          Die Bund-Ecke folgt der Bund-Rendite. Die Kasse-Ecke folgt EZB DFR 2,25&nbsp;%.
+        </p>
+        <p class="hint">
+          An der Aktien-Ecke beträgt der Drawdown 30&nbsp;%. An der Bund-Ecke 8&nbsp;%.
+          An der Kasse-Ecke 0&nbsp;%.
+        </p>
+        <p class="hint">
+          Das Modell liefert keine Prognose. Es sucht kein optimales Portfolio.
         </p>
       </section>
 
       <section class="card market" aria-labelledby="market-title">
         <h2 id="market-title">Markt</h2>
         <div id="market-box">
-          <p>Marktdaten werden gelesen …</p>
+          <p>Marktdaten werden gelesen.</p>
         </div>
       </section>
 
@@ -140,18 +162,21 @@
       </section>
 
       <section class="card" aria-labelledby="task-title">
-        <h2 id="task-title">Aufgabe (Moodle-bereit)</h2>
+        <h2 id="task-title">Aufgabe</h2>
         <div class="task">
           <p>
-            Sie setzen im Dreieck 40&nbsp;% Rendite, 35&nbsp;% Sicherheit und
-            25&nbsp;% Liquidität. Das Lehr-Modell rechnet den Drawdown als
-            30&nbsp;% · 40&nbsp;% + 8&nbsp;% · 35&nbsp;% + 0&nbsp;% · 25&nbsp;%.
+            Sie sitzen weiter am Berger-Mandat. Stellen Sie das Dreieck auf 40 Prozent Rendite, 35 Prozent Sicherheit und 25 Prozent Liquidität.
           </p>
           <p>
-            Wie hoch ist der modellierte maximale Drawdown in Prozent
-            (zwei Dezimalen, de-DE)? Prüfen Sie anschließend, ob die
-            Berger-Grenze von 10,00&nbsp;% eingehalten ist.
+            Das Lehr-Modell rechnet den Drawdown an den drei Ecken. Aktien-Ecke 30 Prozent. Bund-Ecke 8 Prozent. Kasse-Ecke 0 Prozent. Diese drei Sätze werden mit 40 Prozent, 35 Prozent und 25 Prozent gewichtet.
           </p>
+          <p>
+            Schreiben Sie den modellierten maximalen Drawdown in Prozent. Zwei Dezimalen, deutsches Format.
+          </p>
+          <p>
+            Prüfen Sie danach: Liegt dieser Wert unter der Berger-Grenze von 10,00 Prozent oder nicht? Ein Satz reicht.
+          </p>
+          <p>Abgabe in Moodle.</p>
         </div>
       </section>
     </div>
@@ -159,7 +184,7 @@
     <footer class="site-footer">
       <div class="inner">
         <span>Prof. Dr. Wolfgang Hößl · FAM · Einheit T01</span>
-        <span id="footer-meta">Quelle: Beispielstand · EOD/delayed</span>
+        <span id="footer-meta">Beispielstand 17.08.2026. Nicht das Berger-Soll.</span>
       </div>
     </footer>
 

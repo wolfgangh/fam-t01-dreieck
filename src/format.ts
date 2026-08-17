@@ -75,7 +75,7 @@ export function formatYears(years: number, infinite: boolean): string {
 /** de-DE Eingabe: 360.000,00 oder 360000 oder 3,5 */
 export function parseDeNumber(raw: string): number | null {
   const t = raw.trim().replace(/\s/g, "").replace(/€/g, "");
-  if (t === "" || t === "-" || t === "−") return null;
+  if (t === "" || t === "-" || t === "\u2212") return null;
   const hasComma = t.includes(",");
   const hasDot = t.includes(".");
   let normalized = t;
